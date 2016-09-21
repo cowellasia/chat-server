@@ -15,7 +15,7 @@ var express = require('express'),
 var app = express(),
     server = http.createServer(app);
     server.listen(conf.port);
-
+    
 app.configure(function() {
     app.use(express.bodyParser());
     app.use(express.static(__dirname + '/static'));
@@ -53,16 +53,13 @@ app.post('/api/broadcast/', requireAuthentication, function(req, res) {
 }); 
 
 io.sockets.on('connection', function(socket) {
-
     // Welcome message on connection
     socket.emit('connected', 'Welcome to the chat server');
     logger.emit('newEvent', 'userConnected', {'socket':socket.id});
-
     // Store user data in db
     db.hset([socket.id, 'connectionDate', new Date()], redis.print);
     db.hset([socket.id, 'socketID', socket.id], redis.print);
     db.hset([socket.id, 'username', 'anonymous'], redis.print);
-
     // Join user to 'MainRoom'
     socket.join(conf.mainroom);
     logger.emit('newEvent', 'userJoinsRoom', {'socket':socket.id, 'room':conf.mainroom});
@@ -71,42 +68,34 @@ io.sockets.on('connection', function(socket) {
     // Notify subscription to all users in room
     var data = {'room':conf.mainroom, 'username':'anonymous', 'msg':'----- Joined the room -----', 'id':socket.id};
     io.to(conf.mainroom).emit('userJoinsRoom', data);
-
     // User wants to subscribe to [data.rooms]
     socket.on('subscribe', function(data) {
         // Get user info from db
         db.hget([socket.id, 'username'], function(err, username) {
-
             // Subscribe user to chosen rooms
             _.each(data.rooms, function(room) {
                 room = room.replace(" ","");
                 socket.join(room);
                 logger.emit('newEvent', 'userJoinsRoom', {'socket':socket.id, 'username':username, 'room':room});
-
                 // Confirm subscription to user
                 socket.emit('subscriptionConfirmed', {'room': room});
-        
                 // Notify subscription to all users in room
                 var message = {'room':room, 'username':username, 'msg':'----- Joined the room -----', 'id':socket.id};
                 io.to(room).emit('userJoinsRoom', message);
             });
         });
     });
-
     // User wants to unsubscribe from [data.rooms]
     socket.on('unsubscribe', function(data) {
         // Get user info from db
         db.hget([socket.id, 'username'], function(err, username) {
-        
             // Unsubscribe user from chosen rooms
             _.each(data.rooms, function(room) {
                 if (room != conf.mainroom) {
                     socket.leave(room);
                     logger.emit('newEvent', 'userLeavesRoom', {'socket':socket.id, 'username':username, 'room':room});
-                
                     // Confirm unsubscription to user
                     socket.emit('unsubscriptionConfirmed', {'room': room});
-        
                     // Notify unsubscription to all users in room
                     var message = {'room':room, 'username':username, 'msg':'----- Left the room -----', 'id': socket.id};
                     io.to(room).emit('userLeavesRoom', message);
@@ -114,13 +103,11 @@ io.sockets.on('connection', function(socket) {
             });
         });
     });
-
     // User wants to know what rooms he has joined
     socket.on('getRooms', function(data) {
         socket.emit('roomsReceived', socket.rooms);
         logger.emit('newEvent', 'userGetsRooms', {'socket':socket.id});
     });
-
     // Get users in given room
     socket.on('getUsersInRoom', function(data) {
         var usersInRoom = [];
@@ -135,16 +122,13 @@ io.sockets.on('connection', function(socket) {
             });
         }
     });
-
     // User wants to change his nickname
     socket.on('setNickname', function(data) {
         // Get user info from db
         db.hget([socket.id, 'username'], function(err, username) {
-
             // Store user data in db
             db.hset([socket.id, 'username', data.username], redis.print);
             logger.emit('newEvent', 'userSetsNickname', {'socket':socket.id, 'oldUsername':username, 'newUsername':data.username});
-
             // Notify all users who belong to the same rooms that this one
             _.each(socket.rooms, function(room) {
                 if (room) {
@@ -171,15 +155,12 @@ io.sockets.on('connection', function(socket) {
 
     // Clean up on disconnect
     socket.on('disconnect', function() {
-        
         // Get current rooms of user
         var rooms = socket.rooms;
-        
         // Get user info from db
         db.hgetall(socket.id, function(err, obj) {
             if (err) return logger.emit('newEvent', 'error', err);
             logger.emit('newEvent', 'userDisconnected', {'socket':socket.id, 'username':obj.username});
-
             // Notify all users who belong to the same rooms that this one
             _.each(rooms, function(room) {
                 if (room) {
@@ -188,7 +169,6 @@ io.sockets.on('connection', function(socket) {
                 }
             });
         });
-    
         // Delete user from db
         db.del(socket.id, redis.print);
     });
