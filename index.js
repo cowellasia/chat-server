@@ -1,11 +1,3 @@
-
-// Author: Sergio Castaño Arteaga
-// Email: sergio.castano.arteaga@gmail.com
-
-// ***************************************************************************
-// General
-// ***************************************************************************
-
 var conf = { 
     port: 8888,
     debug: false,
@@ -14,20 +6,16 @@ var conf = {
     dbOptions: {},
     mainroom: 'MainRoom'
 };
-
-// External dependencies
 var express = require('express'),
     http = require('http'),
     events = require('events'),
     _ = require('underscore'),
     sanitize = require('validator').sanitize;
 
-// HTTP Server configuration & launch
 var app = express(),
     server = http.createServer(app);
     server.listen(conf.port);
 
-// Express app configuration
 app.configure(function() {
     app.use(express.bodyParser());
     app.use(express.static(__dirname + '/static'));
@@ -42,22 +30,13 @@ var db = require('redis').createClient(conf.dbPort,conf.dbHost);
 // Logger configuration
 var logger = new events.EventEmitter();
 logger.on('newEvent', function(event, data) {
-    // Console log
     console.log('%s: %s', event, JSON.stringify(data));
-    // Persistent log storage too?
-    // TODO
 });
-
-// ***************************************************************************
-// Express routes helpers
-// ***************************************************************************
-
 // Only authenticated users should be able to use protected methods
 var requireAuthentication = function(req, res, next) {
     // TODO
     next();
 };
-
 // Send a message to all active rooms
 var sendBroadcast = function(text) {
     _.each(io.nsps['/'].adapter.rooms, function(sockets, room) {
