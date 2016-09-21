@@ -1,2 +1,2 @@
-# realtime-server
-realtime-server
+# chat-server
+chat-server
