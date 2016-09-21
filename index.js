@@ -25,6 +25,8 @@ var io = require('socket.io')(server);
 var redis = require('socket.io-redis');
 io.adapter(redis({ host: conf.dbHost, port: conf.dbPort }));
 
+io.set('transports', ['websocket']);
+
 var db = require('redis').createClient(conf.dbPort,conf.dbHost);
 
 // Logger configuration
