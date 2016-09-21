@@ -24,22 +24,17 @@ app.configure(function() {
 var io = require('socket.io')(server);
 var redis = require('socket.io-redis');
 io.adapter(redis({ host: conf.dbHost, port: conf.dbPort }));
-
 io.set('transports', ['websocket']);
-
 var db = require('redis').createClient(conf.dbPort,conf.dbHost);
 
-// Logger configuration
 var logger = new events.EventEmitter();
 logger.on('newEvent', function(event, data) {
     console.log('%s: %s', event, JSON.stringify(data));
 });
-// Only authenticated users should be able to use protected methods
 var requireAuthentication = function(req, res, next) {
-    // TODO
     next();
 };
-// Send a message to all active rooms
+
 var sendBroadcast = function(text) {
     _.each(io.nsps['/'].adapter.rooms, function(sockets, room) {
         var message = {'room':room, 'username':'ServerBot', 'msg':text, 'date':new Date()};
@@ -48,24 +43,14 @@ var sendBroadcast = function(text) {
     logger.emit('newEvent', 'newBroadcastMessage', {'msg':text});
 };
 
-// ***************************************************************************
-// Express routes
-// ***************************************************************************
-
-// Welcome message
 app.get('/', function(req, res) {
     res.send(200, "Welcome to chat server");
 });
 
-// Broadcast message to all connected users
 app.post('/api/broadcast/', requireAuthentication, function(req, res) {
     sendBroadcast(req.body.msg);
     res.send(201, "Message sent to all rooms");
 }); 
-
-// ***************************************************************************
-// Socket.io events
-// ***************************************************************************
 
 io.sockets.on('connection', function(socket) {
 
