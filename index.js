@@ -2,7 +2,7 @@ var conf = {
     port: 8888,
     debug: false,
     dbPort: 6379,
-    dbHost: '127.0.0.1',
+    dbHost: 'unchain-session-001.mxpohd.0001.euw1.cache.amazonaws.com',
     dbOptions: {},
     mainroom: 'MainRoom'
 };
