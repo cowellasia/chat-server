@@ -1,7 +1,6 @@
 {
-  "name": "simplechat",
-  "author": "Sergio Castaño Arteaga - sergio.castano.arteaga@gmail.com",
-  "description": "SimpleChat",
+  "name": "chat-server",
+  "description": "Simple Chat Server",
   "version": "0.0.1",
   "private": true,
   "dependencies": {
