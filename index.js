@@ -2,7 +2,7 @@ var conf = {
     port: 3000,
     debug: false,
     dbPort: 6379,
-    dbHost: 'unchain-session-001.mxpohd.0001.euw1.cache.amazonaws.com',
+    dbHost: 'REDIS_HOST',
     dbOptions: {},
     mainroom: 'MainRoom'
 };
